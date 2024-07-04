@@ -72,6 +72,18 @@ public class EntityBasisMapResponseMapper {
 			locationMap = new HashMap();
 			locationMap.put("name", l.getName());
 			locationMap.put("uuid", l.getUuid());
+			locationMap.put("country", l.getCountry() != null ? l.getCountry() : "");
+			locationMap.put("countyDistrict", l.getCountyDistrict() != null ? l.getCountyDistrict() : "");
+			locationMap.put("cityVillage", l.getCityVillage() != null ? l.getCityVillage() : "");
+			locationMap.put("country", l.getCountry() != null ? l.getCountry() : "");
+			locationMap.put("address1", l.getAddress1() != null ? l.getAddress1() : "");
+			locationMap.put("address2", l.getAddress2() != null ? l.getAddress2() : "");
+			locationMap.put("address3", l.getAddress3() != null ? l.getAddress3() : "");
+			locationMap.put("address4", l.getAddress4() != null ? l.getAddress4() : "");
+			locationMap.put("address5", l.getAddress5() != null ? l.getAddress5() : "");
+			locationMap.put("address6", l.getAddress6() != null ? l.getAddress6() : "");
+			locationMap.putAll(l.getActiveAttributes().stream().filter(e -> e.getAttributeType() != null).collect(
+			    Collectors.toMap(e -> e.getAttributeType().getName(), e -> e.getValue(), (e1, e2) -> e1 + "," + e2)));
 		}
 		return locationMap;
 	}
@@ -80,12 +92,13 @@ public class EntityBasisMapResponseMapper {
 		Map map = new HashMap();
 		map.put("name", p.getPersonName().getFullName());
 		map.put("uuid", p.getUuid());
-		map.put("identifier", p.getPatientIdentifier().getIdentifier());
 		map.put("age", p.getAge());
 		map.put("gender", p.getGender());
 		map.putAll(p.getActiveIdentifiers().stream().filter(e -> e.getIdentifierType() != null)
 		        .collect(Collectors.toMap(e -> e.getIdentifierType().toString().replaceAll("[- ]", ""),
 		            e -> e.getIdentifier(), (e1, e2) -> e1 + "," + e2)));
+		map.putAll(p.getActiveAttributes().stream().filter(e -> e.getValue() != null).collect(
+		    Collectors.toMap(e -> e.getAttributeType().getName(), e -> e.getValue(), (e1, e2) -> e1 + "," + e2)));
 		return map;
 	}
 	

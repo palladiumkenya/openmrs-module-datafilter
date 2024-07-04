@@ -71,12 +71,16 @@ public class DataFilterController extends BaseRestController {
 			        && basisDomain.equalsIgnoreCase("org.openmrs.Location")) {
 				basis = Context.getLocationService().getLocationByUuid(basisIdentifier);
 			}
-			
-			if (entity != null && basis != null) {
-				dataFilterService.grantAccess(entity, basis);
-				return new ResponseEntity<>("Assignment done successfully", HttpStatus.OK);
+			if (entity == null) {
+				return new ResponseEntity<>("Data filter Entity is required!", HttpStatus.BAD_REQUEST);
 			}
-			return new ResponseEntity<>("There was an error saving the assignment", HttpStatus.INTERNAL_SERVER_ERROR);
+			
+			if (basis == null) {
+				return new ResponseEntity<>("Data filter Basis is required!", HttpStatus.BAD_REQUEST);
+			}
+			dataFilterService.grantAccess(entity, basis);
+			return new ResponseEntity<>("Data filter mapping done successfully", HttpStatus.CREATED);
+			
 		}
 		catch (Exception e) {
 			log.error("Runtime error while trying to create new appointment", e);
