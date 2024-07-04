@@ -106,7 +106,7 @@ public class EntityBasisMapResponseMapper {
 		Person p = u.getPerson();
 		Map map = new HashMap();
 		map.put("name", p.getPersonName().getFullName());
-		map.put("uuid", p.getUuid());
+		map.put("uuid", u.getUuid());
 		return map;
 	}
 }
