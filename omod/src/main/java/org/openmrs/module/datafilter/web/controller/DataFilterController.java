@@ -79,12 +79,12 @@ public class DataFilterController extends BaseRestController {
 				return new ResponseEntity<>("Data filter Basis is required!", HttpStatus.BAD_REQUEST);
 			}
 			dataFilterService.grantAccess(entity, basis);
-			return new ResponseEntity<>("Data filter mapping done successfully", HttpStatus.CREATED);
+			return new ResponseEntity<>("Data filter access granted successfully", HttpStatus.CREATED);
 			
 		}
 		catch (Exception e) {
-			log.error("Runtime error while trying to create new appointment", e);
-			return new ResponseEntity<>("Runtime error while trying to create new appointment", HttpStatus.BAD_REQUEST);
+			log.error("Runtime error while trying to grant access", e);
+			return new ResponseEntity<>("Runtime error while trying to grant data filter access", HttpStatus.BAD_REQUEST);
 		}
 	}
 	
@@ -115,7 +115,7 @@ public class DataFilterController extends BaseRestController {
 			        && basisDomain.equalsIgnoreCase("org.openmrs.Location")) {
 				basis = Context.getLocationService().getLocationByUuid(basisIdentifier);
 			}
-			
+
 			if (entity != null && basis == null) {
 				entityBasisMaps = dataFilterService.getEntityBasisMaps(entity, basisDomain);
 			} else if (basis != null && entity == null) {
@@ -123,5 +123,45 @@ public class DataFilterController extends BaseRestController {
 			}
 		}
 		return dataFilterMapper.constructResponse(entityBasisMaps.stream().collect(Collectors.toList()));
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "revoke")
+	@ResponseBody
+	public ResponseEntity<Object> revokeAccess(@Valid @RequestBody EntityBasisMap entityBasisMapRequest) {
+		try {
+			OpenmrsObject entity = null;
+			OpenmrsObject basis = null;
+			String entityDomain = entityBasisMapRequest.getEntityType();
+			String entityIdentifier = entityBasisMapRequest.getEntityIdentifier();
+			String basisDomain = entityBasisMapRequest.getBasisType();
+			String basisIdentifier = entityBasisMapRequest.getBasisIdentifier();
+
+			if (StringUtils.isNotBlank(entityDomain) && StringUtils.isNotBlank(entityIdentifier)
+					&& entityDomain.equalsIgnoreCase("org.openmrs.User")) {
+				entity = Context.getUserService().getUserByUuid(entityIdentifier);
+			} else if (StringUtils.isNotBlank(entityDomain) && StringUtils.isNotBlank(entityIdentifier)
+					&& entityDomain.equalsIgnoreCase("org.openmrs.Patient")) {
+				entity = Context.getPatientService().getPatientByUuid(entityIdentifier);
+			}
+
+			if (StringUtils.isNotBlank(basisDomain) && StringUtils.isNotBlank(basisIdentifier)
+					&& basisDomain.equalsIgnoreCase("org.openmrs.Location")) {
+				basis = Context.getLocationService().getLocationByUuid(basisIdentifier);
+			}
+			if (entity == null) {
+				return new ResponseEntity<>("Data filter Entity is required!", HttpStatus.BAD_REQUEST);
+			}
+
+			if (basis == null) {
+				return new ResponseEntity<>("Data filter Basis is required!", HttpStatus.BAD_REQUEST);
+			}
+			dataFilterService.revokeAccess(entity, basis);
+			return new ResponseEntity<>("Access has been revoked successfully", HttpStatus.OK);
+
+		}
+		catch (Exception e) {
+			log.error("Runtime error while trying to revoke data filter access", e);
+			return new ResponseEntity<>("Runtime error while trying to revoke data filter access", HttpStatus.BAD_REQUEST);
+		}
 	}
 }
